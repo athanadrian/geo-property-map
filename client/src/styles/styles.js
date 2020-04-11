@@ -115,7 +115,7 @@ export const useHeaderStyles = makeStyles(theme => ({
   },
   icon: {
     marginRight: theme.spacing(1),
-    color: "green",
+    color: "#424242",
     fontSize: 45
   },
   mobile: {
@@ -131,7 +131,7 @@ export const useHeaderStyles = makeStyles(theme => ({
 // Navbar Component /components/shared/Navbar.js
 export const useNavbarStyles = makeStyles(theme => ({
   appBar: {
-    background: "#ffffff !important",
+    background: "#009688 !important",
     color: "#000000",
     display: "flex",
     alignItems: "center",
@@ -253,16 +253,17 @@ export const useNavbarStyles = makeStyles(theme => ({
   profileActive: {
     border: "1px solid rgba(var(--i1d,38,38,38),1)",
     borderRadius: "50%",
-    height: 28,
+    height: 27,
     marginLeft: "-3px",
     marginTop: "-3px",
-    position: "absolute",
-    width: "28px !important"
+    position: "relative",
+    width: "27px !important"
   },
   profileImage: {
-    width: "22px !important",
-    height: "22px !important",
-    marginBottom: "5px !important"
+    width: "25px !important",
+    height: "25px !important"
+    // marginBottom: "1px !important",
+    // marginTop: "1px !important"
   },
   followers: {
     backgroundImage: `url(${IconSheet})`,
@@ -528,10 +529,12 @@ export const useSignoutStyles = makeStyles(() => ({
     display: "flex"
   },
   buttonText: {
-    color: "orange"
+    color: "#424242",
+    marginRight: "5px",
+    marginLeft: "5px"
   },
   buttonIcon: {
-    marginLeft: "5px",
-    color: "orange"
+    // marginLeft: "5px",
+    color: "#424242"
   }
 }));

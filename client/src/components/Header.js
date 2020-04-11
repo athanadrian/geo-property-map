@@ -1,32 +1,36 @@
-import React, { useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useHeaderStyles, useNavbarStyles } from "../styles/styles";
+import React, { useContext, useState, useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { useMediaQuery } from '@material-ui/core';
 import {
   Typography,
   Hidden,
   Toolbar,
   AppBar,
   Zoom,
-  Avatar
-} from "@material-ui/core";
-import { useMediaQuery } from "@material-ui/core";
-import MapIcon from "@material-ui/icons/Map";
+  Avatar,
+  Grid,
+  Fade,
+  InputBase,
+} from '@material-ui/core';
+import MapIcon from '@material-ui/icons/Map';
+import { useHeaderStyles, useNavbarStyles, WhiteTooltip } from '../styles/styles';
 import {
+  LoadingIcon,
   AddIcon,
   ExploreActiveIcon,
   ExploreIcon,
   HomeActiveIcon,
-  HomeIcon
-} from "../styles/icons";
-
-import Context from "../context";
-import Signout from "./Auth/Signout";
+  HomeIcon,
+} from '../styles/icons';
+import { getProperties } from '../data';
+import Context from '../context';
+import Signout from './Auth/Signout';
 
 const Header = () => {
-  const mobileSize = useMediaQuery("(max-width: 650px)");
+  const mobileSize = useMediaQuery('(max-width: 650px)');
   const classes = useHeaderStyles();
-  // const history = useHistory();
-  // const path = history.location.pathname;
+  const history = useHistory();
+  const path = history.location.pathname;
   const { state } = useContext(Context);
   const { currentUser } = state;
   return (
@@ -37,7 +41,7 @@ const Header = () => {
           <div className={classes.grow}>
             <MapIcon className={classes.icon} />
             <Typography
-              className={mobileSize ? classes.mobile : ""}
+              className={mobileSize ? classes.mobile : ''}
               component="h1"
               variant="h6"
               color="inherit"
@@ -46,33 +50,85 @@ const Header = () => {
               GeoProperty
             </Typography>
           </div>
-
-          {/* Current User Info */}
-          {currentUser && (
-            <div className={classes.grow}>
-              <img
-                className={classes.picture}
-                src={currentUser.picture}
-                alt={currentUser.name}
-              />
-              <Typography
-                className={mobileSize ? classes.mobile : ""}
-                variant="h5"
-                color="inherit"
-                noWrap
-              >
-                {currentUser.name}
-              </Typography>
-            </div>
-          )}
+          <div className={classes.grow}>
+            <Search history={history} />
+          </div>
           <Links currentUser={currentUser} />
-          {/* Signout Button */}
-          <Signout />
         </Toolbar>
       </AppBar>
     </div>
   );
 };
+
+function Search({ history }) {
+  const classes = useNavbarStyles();
+  const [loading] = useState(false);
+  const [results, setResults] = useState([]);
+  const [query, setQuery] = useState('');
+
+  const hasResults = Boolean(query) && results.length > 0;
+
+  useEffect(() => {
+    if (!query.trim()) return;
+    setResults(getProperties());
+  }, [query]);
+
+  const handleClearSearcInput = () => {
+    setQuery('');
+  };
+
+  return (
+    <Hidden xsDown>
+      <WhiteTooltip
+        arrow
+        interactive
+        TransitionComponent={Fade}
+        open={hasResults}
+        title={
+          hasResults && (
+            <Grid className={classes.resultsContainer} container>
+              {results.map((result) => (
+                <Grid
+                  key={result._id}
+                  item
+                  className={classes.resultLink}
+                  onClick={() => {
+                    history.push(`/${result._id}`);
+                    handleClearSearcInput();
+                  }}
+                >
+                  <div className={classes.resultWrapper}>
+                    <div className={classes.avatarWrapper}>
+                      <Avatar src={result.pin.picture} alt={`${result.pin.title}`} />
+                    </div>
+                    <div className={classes.nameWrapper}>
+                      <Typography variant="body1">{result.pin.title}</Typography>
+                    </div>
+                  </div>
+                </Grid>
+              ))}
+            </Grid>
+          )
+        }
+      >
+        <InputBase
+          className={classes.input}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search"
+          startAdornment={<span className={classes.searchIcon} />}
+          endAdornment={
+            loading ? (
+              <LoadingIcon />
+            ) : (
+              <span onClick={handleClearSearcInput} className={classes.clearIcon} />
+            )
+          }
+        />
+      </WhiteTooltip>
+    </Hidden>
+  );
+}
 
 function Links({ path, currentUser }) {
   const classes = useNavbarStyles();
@@ -96,35 +152,21 @@ function Links({ path, currentUser }) {
 
   return (
     <div className={classes.linksContainer}>
-      {/* {showList && <NotificationList handleHideList={handleToggleList} />} */}
       <div className={classes.linksWrapper}>
         <Hidden xsDown>
           <AddIcon />
         </Hidden>
-        <Link to="/">{path === "/" ? <HomeActiveIcon /> : <HomeIcon />}</Link>
+        <Link to="/">{path === '/' ? <HomeActiveIcon /> : <HomeIcon />}</Link>
         <Link to="/explore">
-          {path === "/explore" ? <ExploreActiveIcon /> : <ExploreIcon />}
+          {path === '/explore' ? <ExploreActiveIcon /> : <ExploreIcon />}
         </Link>
-        {/* <RedTooltip
-          arrow
-          open={showToolTip}
-          TransitionComponent={Zoom}
-          onOpen={handleHideToolTip}
-          //title={<NotificationTooltip />}
-        > 
-         <div className={classes.notifications} onClick={handleToggleList}>
-            {!showList ? <NotificationIcon /> : <NotificationActiveIcon />}
-          </div> 
-        </RedTooltip>*/}
         <Link to={`/${currentUser.name}`}>
-          <div
-            className={
-              path === `/${currentUser.name}` ? classes.profileActive : ""
-            }
-          >
-            <Avatar src={currentUser.image} className={classes.profileImage} />
+          <div className={classes.profileActive}>
+            <Avatar src={currentUser.picture} className={classes.profileImage} />
           </div>
         </Link>
+        {/* Signout Button */}
+        <Signout />
       </div>
     </div>
   );
