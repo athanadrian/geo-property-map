@@ -43,7 +43,7 @@ const Header = () => {
               color="inherit"
               noWrap
             >
-              GeoPins
+              GeoProperty
             </Typography>
           </div>
 
