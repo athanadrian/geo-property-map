@@ -11,6 +11,7 @@ module.exports = gql`
   type Pin {
     _id: ID
     createdAt: String
+    updatedAt: String
     title: String
     content: String
     category: String
@@ -19,6 +20,32 @@ module.exports = gql`
     longitude: Float
     author: User
     comments: [Comment]
+    owners: [Owner]
+    assets: [Asset]
+  }
+
+  type Owner {
+    name: String
+    percentage: String
+    createdAt: String
+    creater: User
+  }
+
+  type Asset {
+    codeName: String
+    renter: String
+    rent: String
+    category: String
+    isRented: Boolean
+    creater: User
+  }
+
+  input CreateAssetInput {
+    codeName: String
+    renter: String
+    rent: String
+    category: String
+    isRented: Boolean
   }
 
   type Comment {
@@ -36,6 +63,11 @@ module.exports = gql`
     longitude: Float
   }
 
+  input OwnerInput {
+    name: String
+    percentage: String
+  }
+
   type Query {
     me: User
     getPins: [Pin!]
@@ -45,6 +77,16 @@ module.exports = gql`
     createPin(input: CreatePinInput!): Pin
     deletePin(pinId: ID!): Pin
     createComment(pinId: ID!, text: String!): Pin
+    createOwner(pinId: ID!, name: String!, percentage: String!): Pin
+    deleteOwner(pinId: ID!, i: Int!): Pin
+    createAsset(
+      pinId: ID!
+      codeName: String!
+      renter: String
+      rent: String
+      category: String!
+      isRented: Boolean!
+    ): Pin
   }
 
   type Subscription {

@@ -1,14 +1,13 @@
-import React from "react";
+import React from 'react';
 
-import Header from "../components/Header";
-import Map from "../components/Map";
+import Map from '../components/Map';
+import Layout from '../components/shared/Layout';
 
 const HomePage = () => {
   return (
-    <>
-      <Header />
+    <Layout>
       <Map />
-    </>
+    </Layout>
   );
 };
 

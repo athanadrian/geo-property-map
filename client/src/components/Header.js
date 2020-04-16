@@ -6,13 +6,13 @@ import {
   Hidden,
   Toolbar,
   AppBar,
-  Zoom,
+  //Zoom,
   Avatar,
   Grid,
   Fade,
   InputBase,
 } from '@material-ui/core';
-import MapIcon from '@material-ui/icons/Map';
+//import MapIcon from '@material-ui/icons/Map';
 import { useHeaderStyles, useNavbarStyles, WhiteTooltip } from '../styles/styles';
 import {
   LoadingIcon,
@@ -21,6 +21,8 @@ import {
   ExploreIcon,
   HomeActiveIcon,
   HomeIcon,
+  MapIcon1,
+  DashboardIcon,
 } from '../styles/icons';
 import { getProperties } from '../data';
 import Context from '../context';
@@ -30,7 +32,7 @@ const Header = () => {
   const mobileSize = useMediaQuery('(max-width: 650px)');
   const classes = useHeaderStyles();
   const history = useHistory();
-  const path = history.location.pathname;
+  // const path = history.location.pathname;
   const { state } = useContext(Context);
   const { currentUser } = state;
   return (
@@ -39,7 +41,7 @@ const Header = () => {
         <Toolbar>
           {/* Title / Logo */}
           <div className={classes.grow}>
-            <MapIcon className={classes.icon} />
+            <MapIcon1 className={classes.icon} />
             <Typography
               className={mobileSize ? classes.mobile : ''}
               component="h1"
@@ -132,23 +134,23 @@ function Search({ history }) {
 
 function Links({ path, currentUser }) {
   const classes = useNavbarStyles();
-  const [showList, setList] = useState(false);
-  const [showToolTip, setToolTip] = useState(true);
+  //const [showList, setList] = useState(false);
+  //const [showToolTip, setToolTip] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(handleHideToolTip, 5000);
-    return () => {
-      clearTimeout(timeout);
-    };
+    // const timeout = setTimeout(handleHideToolTip, 5000);
+    // return () => {
+    //   clearTimeout(timeout);
+    // };
   }, []);
 
-  const handleToggleList = () => {
-    setList(!showList);
-  };
+  // const handleToggleList = () => {
+  //   setList(!showList);
+  // };
 
-  const handleHideToolTip = () => {
-    setToolTip(false);
-  };
+  // const handleHideToolTip = () => {
+  //   setToolTip(false);
+  // };
 
   return (
     <div className={classes.linksContainer}>
@@ -157,8 +159,8 @@ function Links({ path, currentUser }) {
           <AddIcon />
         </Hidden>
         <Link to="/">{path === '/' ? <HomeActiveIcon /> : <HomeIcon />}</Link>
-        <Link to="/explore">
-          {path === '/explore' ? <ExploreActiveIcon /> : <ExploreIcon />}
+        <Link to="/dashboard">
+          {path === '/dashboard' ? <DashboardIcon alt="Dashboard" /> : <DashboardIcon />}
         </Link>
         <Link to={`/${currentUser.name}`}>
           <div className={classes.profileActive}>

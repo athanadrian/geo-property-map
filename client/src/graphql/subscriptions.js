@@ -1,10 +1,11 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 export const PIN_ADDED_SUBSCRIPTION = gql`
   subscription {
     pinAdded {
       _id
       createdAt
+      updatedAt
       title
       category
       image
@@ -16,6 +17,25 @@ export const PIN_ADDED_SUBSCRIPTION = gql`
         name
         email
         picture
+      }
+      owners {
+        name
+        percentage
+        creater {
+          name
+          picture
+        }
+      }
+      assets {
+        codeName
+        renter
+        rent
+        category
+        isRented
+        creater {
+          name
+          picture
+        }
       }
       comments {
         text
@@ -34,6 +54,7 @@ export const PIN_UPDATED_SUBSCRIPTION = gql`
     pinUpdated {
       _id
       createdAt
+      updatedAt
       title
       category
       content
@@ -43,6 +64,25 @@ export const PIN_UPDATED_SUBSCRIPTION = gql`
       author {
         _id
         name
+      }
+      owners {
+        name
+        percentage
+        creater {
+          name
+          picture
+        }
+      }
+      assets {
+        codeName
+        renter
+        rent
+        category
+        isRented
+        creater {
+          name
+          picture
+        }
       }
       comments {
         text

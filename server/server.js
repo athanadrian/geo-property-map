@@ -42,7 +42,7 @@ const port = process.env.PORT || 4000;
 
 // Connect to Server
 server
-  .listen()
+  .listen(port)
   .then(({ url }) =>
     console.log(
       `${'Server'.yellow.bold} ${'is running in'.yellow} ${

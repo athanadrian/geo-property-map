@@ -1,59 +1,64 @@
-import React, { useState, useEffect, useContext } from "react";
-import ReactMapGL, { NavigationControl, Marker, Popup } from "react-map-gl";
-import { useMapStyles } from "../styles/styles";
-import differenceInMinutes from "date-fns/difference_in_minutes";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
-import { useMediaQuery } from "@material-ui/core";
-import { Subscription } from "react-apollo";
+import React, { useState, useEffect, useContext } from 'react';
+import ReactMapGL, { NavigationControl, Marker, Popup } from 'react-map-gl';
+import { useMapStyles } from '../styles/styles';
+import differenceInMinutes from 'date-fns/difference_in_minutes';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import { Delete, Edit } from '@material-ui/icons';
+import { useMediaQuery } from '@material-ui/core';
+import { Subscription } from 'react-apollo';
 
-import { useClient } from "../client";
-import config from "../config";
-import { GET_PINS_QUERY } from "../graphql/queries";
-import { DELETE_PIN_MUTATION } from "../graphql/mutations";
+import { useClient } from '../client';
+import config from '../config';
+import { GET_PINS_QUERY } from '../graphql/queries';
+import { DELETE_PIN_MUTATION } from '../graphql/mutations';
 import {
   PIN_ADDED_SUBSCRIPTION,
   PIN_UPDATED_SUBSCRIPTION,
-  PIN_DELETED_SUBSCRIPTION
-} from "../graphql/subscriptions";
-import PinIcon from "./PinIcon";
-import Blog from "./Blog";
-import Context from "../context";
+  PIN_DELETED_SUBSCRIPTION,
+} from '../graphql/subscriptions';
+import PinIcon from './PinIcon';
+import Blog from './Blog';
+import Context from '../context';
 
 const { HOME, MAPBOX_KEY } = config;
 const INITIAL_VIEWPORT = {
-  longitude: HOME.latitude,
   latitude: HOME.longitude,
-  zoom: 13
+  longitude: HOME.latitude,
+  zoom: 13,
 };
 
 const Map = () => {
   const client = useClient();
-  const mobileSize = useMediaQuery("(max-width: 650px)");
-  const classes = useMapStyles();
   const { state, dispatch } = useContext(Context);
+  const mobileSize = useMediaQuery('(max-width: 650px)');
+  const classes = useMapStyles();
+
   useEffect(() => {
     getPins();
   }, []);
+
+  const handleOnChangeViewPort = (viewport) => {
+    setViewport(viewport);
+  };
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
   const [userPosition, setUserPosition] = useState(null);
   useEffect(() => {
     getUserPosition();
   }, []);
   const [popup, setPopup] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
   // remove popup if pin itself is deleted by the author of the pin
   useEffect(() => {
-    const pinExists =
-      popup && state.pins.findIndex(pin => pin._id === popup._id) > -1;
+    const pinExists = popup && state.pins.findIndex((pin) => pin._id === popup._id) > -1;
     if (!pinExists) {
       setPopup(null);
     }
-  }, [state.pins.length]);
+  }, [popup, state.pins]);
 
   const getUserPosition = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(position => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude } = position.coords;
         setViewport({ ...viewport, latitude, longitude });
         setUserPosition({ latitude, longitude });
@@ -63,35 +68,58 @@ const Map = () => {
 
   const getPins = async () => {
     const { getPins } = await client.request(GET_PINS_QUERY);
-    dispatch({ type: "GET_PINS", payload: getPins });
+    dispatch({ type: 'GET_PINS', payload: getPins });
   };
 
   const handleMapClick = ({ lngLat, leftButton }) => {
     if (!leftButton) return;
     if (!state.draft) {
-      dispatch({ type: "CREATE_DRAFT" });
+      dispatch({ type: 'CREATE_DRAFT' });
     }
     const [longitude, latitude] = lngLat;
     dispatch({
-      type: "UPDATE_DRAFT_LOCATION",
-      payload: { longitude, latitude }
+      type: 'UPDATE_DRAFT_LOCATION',
+      payload: { longitude, latitude },
+    });
+  };
+  const handleAddPinCurrentLocation = ({ leftButton }) => {
+    //if (!leftButton) return;
+    if (!state.draft) {
+      dispatch({ type: 'CREATE_DRAFT' });
+    }
+    console.log('cl', userPosition);
+    const [longitude, latitude] = [userPosition.longitude, userPosition.latitude];
+    dispatch({
+      type: 'UPDATE_DRAFT_LOCATION',
+      payload: { longitude, latitude },
     });
   };
 
-  const highlightNewPin = pin => {
-    const isNewPin =
-      differenceInMinutes(Date.now(), Number(pin.createdAt)) <= 30;
-    return isNewPin ? "limegreen" : "darkblue";
+  const highlightNewPin = (pin) => {
+    const isNewPin = differenceInMinutes(Date.now(), Number(pin.createdAt)) <= 30;
+    return isNewPin ? 'limegreen' : 'darkblue';
   };
 
-  const handleSelectPin = pin => {
+  const handleSelectPin = (pin) => {
     setPopup(pin);
-    dispatch({ type: "SET_PIN", payload: pin });
+    dispatch({ type: 'SET_PIN', payload: pin });
   };
 
   const isAuthUser = () => state.currentUser._id === popup.author._id;
 
-  const handleDeletePin = async pin => {
+  const handleCancelEdit = () => {
+    setIsEdit(!isEdit);
+  };
+
+  const handleEditPin = async (pin) => {
+    console.log('edit pin');
+    handleCancelEdit();
+    // const variables = { pinId: pin._id };
+    // await client.request(UPDATE_PIN_MUTATION, variables);
+    // setPopup(null);
+  };
+
+  const handleDeletePin = async (pin) => {
     const variables = { pinId: pin._id };
     await client.request(DELETE_PIN_MUTATION, variables);
     setPopup(null);
@@ -104,16 +132,15 @@ const Map = () => {
         height="calc(100vh - 64px)"
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxApiAccessToken={MAPBOX_KEY}
-        //"pk.eyJ1IjoicmVlZGJhcmdlcmNvZGVzIiwiYSI6ImNqczVodXgzczAwM3E0M3MydzI0OHN0ZzEifQ.0qj4u8RW-Rj6An3WFLXKqA"
         scrollZoom={!mobileSize}
-        onViewportChange={newViewport => setViewport(newViewport)}
+        onViewportChange={handleOnChangeViewPort}
         onClick={handleMapClick}
         {...viewport}
       >
         {/* Navigation Control */}
         <div className={classes.navigationControl}>
           <NavigationControl
-            onViewportChange={newViewport => setViewport(newViewport)}
+            onViewportChange={(newViewport) => setViewport(newViewport)}
           />
         </div>
 
@@ -125,7 +152,7 @@ const Map = () => {
             offsetLeft={-19}
             offsetTop={-37}
           >
-            <PinIcon size={40} color="red" />
+            <PinIcon size={40} color="red" onClick={handleAddPinCurrentLocation} />
           </Marker>
         )}
 
@@ -142,7 +169,7 @@ const Map = () => {
         )}
 
         {/* Created Pins */}
-        {state.pins.map(pin => (
+        {state.pins.map((pin) => (
           <Marker
             key={pin._id}
             latitude={pin.latitude}
@@ -167,21 +194,24 @@ const Map = () => {
             closeOnClick={false}
             onClose={() => setPopup(null)}
           >
-            <img
-              className={classes.popupImage}
-              src={popup.image}
-              alt={popup.title}
-            />
-            <div className={classes.popupTab}>
-              <Typography>
-                {popup.latitude.toFixed(6)}, {popup.longitude.toFixed(6)}
-              </Typography>
-              {isAuthUser() && (
-                <Button onClick={() => handleDeletePin(popup)}>
-                  <DeleteIcon className={classes.deleteIcon} />
-                </Button>
-              )}
-            </div>
+            <>
+              <img className={classes.popupImage} src={popup.image} alt={popup.title} />
+              <div className={classes.popupTab}>
+                <Typography>
+                  {popup.latitude.toFixed(6)}, {popup.longitude.toFixed(6)}
+                </Typography>
+                {isAuthUser() && (
+                  <div className={classes.actionButtons}>
+                    <Button variant="outlined" onClick={() => handleDeletePin(popup)}>
+                      <Delete className={classes.deleteIcon} />
+                    </Button>
+                    <Button variant="outlined" onClick={() => handleEditPin(popup)}>
+                      <Edit className={classes.editIcon} />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
           </Popup>
         )}
       </ReactMapGL>
@@ -192,7 +222,7 @@ const Map = () => {
         onSubscriptionData={({ subscriptionData }) => {
           const { pinAdded } = subscriptionData.data;
           console.log({ pinAdded });
-          dispatch({ type: "CREATE_PIN", payload: pinAdded });
+          dispatch({ type: 'CREATE_PIN', payload: pinAdded });
         }}
       />
       <Subscription
@@ -200,7 +230,10 @@ const Map = () => {
         onSubscriptionData={({ subscriptionData }) => {
           const { pinUpdated } = subscriptionData.data;
           console.log({ pinUpdated });
-          dispatch({ type: "CREATE_COMMENT", payload: pinUpdated });
+          dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
+          dispatch({ type: 'CREATE_OWNER', payload: pinUpdated });
+          dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
+          dispatch({ type: 'DELETE_OWNER', payload: pinUpdated });
         }}
       />
       <Subscription
@@ -208,12 +241,12 @@ const Map = () => {
         onSubscriptionData={({ subscriptionData }) => {
           const { pinDeleted } = subscriptionData.data;
           console.log({ pinDeleted });
-          dispatch({ type: "DELETE_PIN", payload: pinDeleted });
+          dispatch({ type: 'DELETE_PIN', payload: pinDeleted });
         }}
       />
 
       {/* Blog Area to add Pin Content */}
-      <Blog />
+      <Blog isEdit={isEdit} handleCancelEdit={handleCancelEdit} />
     </div>
   );
 };

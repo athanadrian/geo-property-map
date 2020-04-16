@@ -10,11 +10,11 @@ import {
   Typography,
   Zoom,
 } from '@material-ui/core';
-import { useNavbarStyles, WhiteTooltip, RedTooltip } from '../../_styles/styles.js';
+import { useNavbarStyles, WhiteTooltip, RedTooltip } from '../../styles/styles';
 // import NotificationList from '../notification/NotificationList';
 // import NotificationTooltip from '../notification/NotificationTooltip';
 import logo from '../../images/logo_title.png';
-import { defaultCurrentUser, getDefaultUser } from '../../dev-data/data';
+import { defaultCurrentUser, getDefaultUser } from '../../data';
 import {
   LoadingIcon,
   AddIcon,
@@ -24,7 +24,7 @@ import {
   ExploreIcon,
   HomeActiveIcon,
   HomeIcon,
-} from '../../_styles/icons';
+} from '../../styles/icons.js';
 import { useNProgress } from '@tanem/react-nprogress';
 
 function Navbar({ minimalNavbar }) {
@@ -167,8 +167,8 @@ function Links({ path }) {
           <AddIcon />
         </Hidden>
         <Link to="/">{path === '/' ? <HomeActiveIcon /> : <HomeIcon />}</Link>
-        <Link to="/explore">
-          {path === '/explore' ? <ExploreActiveIcon /> : <ExploreIcon />}
+        <Link to="/dashboard">
+          {path === '/dashboard' ? <ExploreActiveIcon /> : <ExploreIcon />}
         </Link>
         <RedTooltip
           arrow

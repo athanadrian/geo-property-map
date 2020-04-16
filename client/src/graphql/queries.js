@@ -14,6 +14,7 @@ export const GET_PINS_QUERY = `
     getPins {
       _id
       createdAt
+      updatedAt
       title
       category
       image
@@ -25,6 +26,27 @@ export const GET_PINS_QUERY = `
         name
         email
         picture
+      }
+      owners {
+        name
+        percentage
+        creater {
+          _id 
+          name
+          picture
+        }
+      }
+      assets {
+        codeName
+        renter
+        rent
+        category
+        isRented
+        creater {
+          _id 
+          name
+          picture
+        }
       }
       comments {
         text
