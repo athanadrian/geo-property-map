@@ -52,7 +52,6 @@ const CreatePin = () => {
 
     return res.data.url;
   };
-  console.log('ctxo', state.owners);
   const handleSubmit = async (event) => {
     try {
       event.preventDefault();

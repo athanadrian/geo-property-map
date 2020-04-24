@@ -17,8 +17,6 @@ import { useHeaderStyles, useNavbarStyles, WhiteTooltip } from '../styles/styles
 import {
   LoadingIcon,
   AddIcon,
-  ExploreActiveIcon,
-  ExploreIcon,
   HomeActiveIcon,
   HomeIcon,
   MapIcon1,

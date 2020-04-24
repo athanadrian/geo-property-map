@@ -12,18 +12,21 @@ import {
 } from '@material-ui/core';
 import { ApartmentIcon, MaisonetteIcon, OfficeIcon } from '../../styles/icons';
 import { CREATE_ASSET_MUTATION } from '../../graphql/mutations';
+import { UPDATE_ASSET_MUTATION } from '../../graphql/mutations';
 import { useClient } from '../../client';
 import Context from '../../context';
 
-const CreateAsset = () => {
+const CreateAsset = ({ isAssetEdit, setIsAssetEdit, handleEditAsset, assetRow }) => {
   const classes = useCreateAssetStyles();
   const client = useClient();
   const { state } = useContext(Context);
-  const [codeName, setCodeName] = useState('');
-  const [category, setCategory] = useState('');
-  const [isRented, setIsRented] = useState(false);
-  const [renter, setRenter] = useState('');
-  const [rent, setRent] = useState('');
+  let [codeName, setCodeName] = useState('');
+  let [category, setCategory] = useState('');
+  let [isRented, setIsRented] = useState(false);
+  let [renter, setRenter] = useState('');
+  let [rent, setRent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const { asset, i } = assetRow;
 
   const handleSubmitAsset = async () => {
     const variables = {
@@ -34,7 +37,6 @@ const CreateAsset = () => {
       renter,
       rent,
     };
-    console.log('variables', variables);
     try {
       await client.request(CREATE_ASSET_MUTATION, variables);
       setCodeName('');
@@ -47,6 +49,40 @@ const CreateAsset = () => {
     }
   };
 
+  const handleOnFocus = () => {
+    console.log('focus');
+    if (isAssetEdit) {
+      setIsEditing(true);
+      setIsAssetEdit(false);
+    }
+  };
+
+  handleEditAsset = async () => {
+    const variables = {
+      pinId: state.currentPin._id,
+      i,
+      codeName,
+      category,
+      isRented,
+      renter,
+      rent,
+    };
+    console.log('vars', variables);
+    await client.request(UPDATE_ASSET_MUTATION, variables);
+    setCodeName('');
+    setIsRented(false);
+    setCategory('');
+    setRenter('');
+    setRent('');
+  };
+
+  if (isAssetEdit) {
+    codeName = asset.codeName;
+    category = asset.category;
+    isRented = asset.isRented;
+    renter = asset.renter;
+    rent = asset.rent;
+  }
   return (
     <>
       <div className={classes.itemRow}>
@@ -58,17 +94,19 @@ const CreateAsset = () => {
           padding="normal"
           variant="outlined"
           placeholder="Insert code name"
-          value={codeName}
+          onFocus={handleOnFocus}
+          value={!isAssetEdit ? codeName : asset.codeName}
           onChange={(e) => setCodeName(e.target.value)}
         />
         <TextField
           id="category"
           select
           label="Category"
-          value={category}
+          value={!isAssetEdit ? category : asset.category}
           helperText="Please select a category"
           margin="normal"
           variant="outlined"
+          onFocus={handleOnFocus}
           onChange={(e) => setCategory(e.target.value)}
           fullWidth
         >
@@ -110,7 +148,7 @@ const CreateAsset = () => {
               //label="The Asset is Rented."
               name="checkedB"
               checked={isRented}
-              value={isRented}
+              value={!isAssetEdit ? isRented : asset.isRented}
               onChange={(e) => setIsRented(e.target.checked)}
             />
           }
@@ -123,7 +161,8 @@ const CreateAsset = () => {
             id="renter"
             select
             label="Renter"
-            value={renter}
+            //onFocus={handleOnFocus}
+            value={!isAssetEdit ? renter : asset.renter}
             helperText="Select a Renterr"
             margin="normal"
             padding="normal"
@@ -159,23 +198,42 @@ const CreateAsset = () => {
             helperText="Define Rent"
             variant="outlined"
             fullWidth
-            value={rent}
+            //onFocus={handleOnFocus}
+            value={!isAssetEdit ? rent : asset.rent}
             onChange={(e) => setRent(e.target.value)}
           />
         </div>
       )}
       <div className={classes.itemRowButton}>
-        <Button
-          variant={!category || !codeName ? 'outlined' : 'contained'}
-          color="primary"
-          onClick={handleSubmitAsset}
-          disabled={!category || !codeName}
-          className={
-            !category || !codeName ? classes.sendButtonNotValid : classes.sendButtonValid
-          }
-        >
-          Add
-        </Button>
+        {!isAssetEdit && !isEditing ? (
+          <Button
+            variant={!category || !codeName ? 'outlined' : 'contained'}
+            color="primary"
+            onClick={handleSubmitAsset}
+            disabled={!category || !codeName}
+            className={
+              !category || !codeName
+                ? classes.sendButtonNotValid
+                : classes.sendButtonValid
+            }
+          >
+            Add
+          </Button>
+        ) : (
+          <Button
+            variant={!category || !codeName ? 'outlined' : 'contained'}
+            onClick={handleEditAsset}
+            color="primary"
+            disabled={!category || !codeName}
+            className={
+              !category || !codeName
+                ? classes.sendButtonNotValid
+                : classes.sendButtonValid
+            }
+          >
+            Edit
+          </Button>
+        )}
       </div>
       <Divider />
     </>

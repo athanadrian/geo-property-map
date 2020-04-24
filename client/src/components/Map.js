@@ -35,17 +35,19 @@ const Map = () => {
   const classes = useMapStyles();
 
   useEffect(() => {
+    const getPins = async () => {
+      const { getPins } = await client.request(GET_PINS_QUERY);
+      dispatch({ type: 'GET_PINS', payload: getPins });
+    };
     getPins();
-  }, []);
+  }, [client, dispatch]);
 
   const handleOnChangeViewPort = (viewport) => {
     setViewport(viewport);
   };
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT);
   const [userPosition, setUserPosition] = useState(null);
-  useEffect(() => {
-    getUserPosition();
-  }, []);
+
   const [popup, setPopup] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   // remove popup if pin itself is deleted by the author of the pin
@@ -56,20 +58,18 @@ const Map = () => {
     }
   }, [popup, state.pins]);
 
-  const getUserPosition = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        setViewport({ ...viewport, latitude, longitude });
-        setUserPosition({ latitude, longitude });
-      });
-    }
-  };
-
-  const getPins = async () => {
-    const { getPins } = await client.request(GET_PINS_QUERY);
-    dispatch({ type: 'GET_PINS', payload: getPins });
-  };
+  useEffect(() => {
+    const getUserPosition = () => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          setViewport({ ...viewport, latitude, longitude });
+          setUserPosition({ latitude, longitude });
+        });
+      }
+    };
+    getUserPosition();
+  }, [viewport]);
 
   const handleMapClick = ({ lngLat, leftButton }) => {
     if (!leftButton) return;
@@ -230,10 +230,12 @@ const Map = () => {
         onSubscriptionData={({ subscriptionData }) => {
           const { pinUpdated } = subscriptionData.data;
           console.log({ pinUpdated });
-          dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
-          dispatch({ type: 'CREATE_OWNER', payload: pinUpdated });
-          dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
-          dispatch({ type: 'DELETE_OWNER', payload: pinUpdated });
+          // dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
+          // dispatch({ type: 'CREATE_OWNER', payload: pinUpdated });
+          // dispatch({ type: 'CREATE_ASSET', payload: pinUpdated });
+          // dispatch({ type: 'DELETE_OWNER', payload: pinUpdated });
+          // dispatch({ type: 'DELETE_ASSET', payload: pinUpdated });
+          dispatch({ type: 'UPDATE_PIN', payload: pinUpdated });
         }}
       />
       <Subscription

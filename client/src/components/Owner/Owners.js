@@ -11,22 +11,26 @@ import {
   ListItemSecondaryAction,
   IconButton,
 } from '@material-ui/core';
-import { DeleteFromDBIcon } from '../../styles/icons';
+import { HighlightOff, Edit } from '@material-ui/icons';
+//import { EDIT_OWNER_MUTATION } from '../../graphql/mutations';
 import { DELETE_OWNER_MUTATION } from '../../graphql/mutations';
 import { useClient } from '../../client';
 import Context from '../../context';
 
 //import distanceInWordsToNow from 'date-fns/distance_in_words_to_now';
 
-const Owners = ({ owners }) => {
+const Owners = ({ owners, handleEditOwnerClick, handleEditOwnerButton, setOwnerRow }) => {
   const classes = useOwnersStyles();
   const client = useClient();
-  const { state, dispatch } = useContext(Context);
+  const { state } = useContext(Context);
   const totalOwners = owners.length;
 
+  handleEditOwnerClick = (owner, i) => {
+    handleEditOwnerButton();
+    setOwnerRow({ owner, i });
+  };
+
   const handleDeleteOwner = async (i) => {
-    state.currentPin.owners.splice(i, 1);
-    dispatch({ type: 'DELETE_OWNER', payload: state.currentPin });
     const variables = { pinId: state.currentPin._id, i: i };
     await client.request(DELETE_OWNER_MUTATION, variables);
   };
@@ -42,16 +46,24 @@ const Owners = ({ owners }) => {
         <div key={i}>
           <ListItem className={classes.listItemWrapper} alignItems="flex-start">
             <ListItemAvatar>
-              <Avatar>{i + 1}</Avatar>
+              <Avatar color="primary">{i + 1}</Avatar>
             </ListItemAvatar>
             <ListItemText primary={owner.name} secondary={`${owner.percentage} %`} />
             <ListItemSecondaryAction>
               <IconButton
                 edge="end"
                 aria-label="comments"
+                onClick={() => handleEditOwnerClick(owner, i)}
+                //handleDeleteOwner={()=>onHandleEditOwner(owner)}
+              >
+                <Edit className={classes.editButton} />
+              </IconButton>
+              <IconButton
+                edge="end"
+                aria-label="comments"
                 onClick={() => handleDeleteOwner(i)}
               >
-                <DeleteFromDBIcon />
+                <HighlightOff className={classes.deleteButton} />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>

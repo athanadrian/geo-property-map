@@ -2,15 +2,35 @@ import React, { useState, useContext } from 'react';
 import { useCreateOwnerStyles } from '../../styles/styles';
 import { Typography, TextField, MenuItem, Button, Divider } from '@material-ui/core';
 import { CREATE_OWNER_MUTATION } from '../../graphql/mutations';
+import { UPDATE_OWNER_MUTATION } from '../../graphql/mutations';
+//import EditableInput from '../shared/EditableInput';
 import { useClient } from '../../client';
 import Context from '../../context';
 
-const CreateOwner = () => {
+const CreateOwner = ({ isOwnerEdit, setIsOwnerEdit, handleEditOwner, ownerRow }) => {
   const classes = useCreateOwnerStyles();
   const client = useClient();
   const { state } = useContext(Context);
-  const [name, setName] = useState('');
-  const [percentage, setPercentage] = useState('');
+  let [name, setName] = useState('');
+  let [percentage, setPercentage] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const { owner, i } = ownerRow;
+
+  const handleChangeName = (e) => {
+    setName(e.target.value);
+  };
+
+  const handleChangePercentage = (e) => {
+    setPercentage(e.target.value);
+  };
+
+  const handleOnFocus = () => {
+    console.log('focus');
+    if (isOwnerEdit) {
+      setIsEditing(true);
+      setIsOwnerEdit(false);
+    }
+  };
 
   const handleSubmitOwner = async () => {
     const variables = { pinId: state.currentPin._id, name: name, percentage: percentage };
@@ -19,6 +39,25 @@ const CreateOwner = () => {
     setPercentage('');
   };
 
+  handleEditOwner = async () => {
+    const variables = {
+      pinId: state.currentPin._id,
+      i,
+      name,
+      percentage,
+    };
+    console.log('vars', variables);
+    await client.request(UPDATE_OWNER_MUTATION, variables);
+    setName('');
+    setPercentage('');
+    setIsEditing(false);
+  };
+
+  if (isOwnerEdit) {
+    name = owner.name;
+    percentage = owner.percentage;
+  }
+
   return (
     <>
       <div className={classes.itemRow}>
@@ -26,12 +65,13 @@ const CreateOwner = () => {
           id="name"
           select
           label="Owner"
-          value={name}
+          value={!isOwnerEdit ? name : owner.name}
           helperText="Select an owner"
           margin="normal"
           padding="normal"
           variant="outlined"
-          onChange={(e) => setName(e.target.value)}
+          onFocus={handleOnFocus}
+          onChange={handleChangeName}
           fullWidth
         >
           <MenuItem value="">
@@ -62,8 +102,9 @@ const CreateOwner = () => {
           helperText="Select percentage"
           variant="outlined"
           fullWidth
-          value={percentage}
-          onChange={(e) => setPercentage(e.target.value)}
+          onFocus={handleOnFocus}
+          value={!isOwnerEdit ? percentage : owner.percentage}
+          onChange={handleChangePercentage}
         >
           <MenuItem value="">
             <em>None</em>
@@ -110,17 +151,31 @@ const CreateOwner = () => {
         </TextField>
       </div>
       <div className={classes.itemRowButton}>
-        <Button
-          variant={!name || !percentage ? 'outlined' : 'contained'}
-          onClick={handleSubmitOwner}
-          color="primary"
-          disabled={!name || !percentage}
-          className={
-            !name || !percentage ? classes.sendButtonNotValid : classes.sendButtonValid
-          }
-        >
-          Add
-        </Button>
+        {!isOwnerEdit && !isEditing ? (
+          <Button
+            variant={!name || !percentage ? 'outlined' : 'contained'}
+            onClick={handleSubmitOwner}
+            color="primary"
+            disabled={!name || !percentage}
+            className={
+              !name || !percentage ? classes.sendButtonNotValid : classes.sendButtonValid
+            }
+          >
+            Add
+          </Button>
+        ) : (
+          <Button
+            variant={!name || !percentage ? 'outlined' : 'contained'}
+            onClick={handleEditOwner}
+            color="primary"
+            disabled={!name || !percentage}
+            className={
+              !name || !percentage ? classes.sendButtonNotValid : classes.sendButtonValid
+            }
+          >
+            Edit
+          </Button>
+        )}
       </div>
       <Divider />
     </>

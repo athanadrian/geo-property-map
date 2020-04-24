@@ -128,6 +128,52 @@ export const CREATE_OWNER_MUTATION = `
     }
   }
 `;
+export const UPDATE_OWNER_MUTATION = `
+  mutation($pinId: ID!, $i: Int!, $name: String!, $percentage: String!) {
+    updateOwner(pinId: $pinId, i: $i, name: $name, percentage: $percentage) {
+      _id
+      createdAt
+      updatedAt
+      title
+      category
+      content
+      image
+      latitude
+      longitude
+      author {
+        _id
+        name
+      }
+      owners {
+        name
+        percentage
+        creater {
+          name
+          picture
+        }
+      }
+      comments {
+        text
+        createdAt
+        author {
+          name
+          picture
+        }
+      }
+      assets {
+        codeName
+        renter
+        rent
+        category
+        isRented
+        creater {
+          name
+          picture
+        }
+      }
+    }
+  }
+`;
 
 export const DELETE_OWNER_MUTATION = `
   mutation($pinId: ID!, $i:Int!) {
@@ -180,6 +226,60 @@ export const CREATE_ASSET_MUTATION = `
           picture
         }
       }
+    }
+  }
+`;
+export const UPDATE_ASSET_MUTATION = `
+  mutation($pinId: ID!, $i: Int!, $codeName: String!, $renter: String, $rent: String, $isRented:Boolean!, $category:String!) {
+    updateAsset(pinId: $pinId, i: $i, codeName: $codeName, renter: $renter, rent: $rent, isRented:$isRented, category:$category) {
+      _id
+      createdAt
+      updatedAt
+      title
+      category
+      content
+      image
+      latitude
+      longitude
+      author {
+        _id
+        name
+      }
+      assets {
+        codeName
+        renter
+        rent
+        category
+        isRented
+        creater {
+          name
+          picture
+        }
+      }
+      owners {
+        name
+        percentage
+        creater {
+          name
+          picture
+        }
+      }
+      comments {
+        text
+        createdAt
+        author {
+          name
+          picture
+        }
+      }
+    }
+  }
+`;
+
+export const DELETE_ASSET_MUTATION = `
+  mutation($pinId: ID!, $i:Int!) {
+    deleteAsset(pinId: $pinId, i:$i) {
+      _id
     }
   }
 `;

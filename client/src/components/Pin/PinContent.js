@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { usePinContentStyles } from '../../styles/styles';
 import {
   Edit,
@@ -30,7 +30,6 @@ const PinContent = ({ isEdit, handleCancelEdit }) => {
   const classes = usePinContentStyles();
   const { state } = useContext(Context);
   //const [image, setImage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   //const [title, setTitle] = useState('');
   //const [category, setCategory] = useState('');
   const {
@@ -188,9 +187,7 @@ const PinContent = ({ isEdit, handleCancelEdit }) => {
                 className={classes.button}
                 variant="contained"
                 color="secondary"
-                disabled={
-                  !title.trim() || !content.trim() || !category || !image || submitting
-                }
+                disabled={!title.trim() || !content.trim() || !category || !image}
                 //onClick={handleSubmit}
               >
                 Update

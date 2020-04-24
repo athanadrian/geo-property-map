@@ -55,6 +55,7 @@ module.exports = {
       pubsub.publish(PIN_UPDATED, { pinUpdated });
       return pinUpdated;
     }),
+
     createOwner: authenticated(async (root, args, ctx) => {
       const newOwner = {
         name: args.name,
@@ -73,14 +74,18 @@ module.exports = {
       pubsub.publish(PIN_UPDATED, { pinUpdated });
       return pinUpdated;
     }),
+
     deleteOwner: authenticated(async (root, args, ctx) => {
       const pin = await Pin.find({ _id: args.pinId }).exec();
-      // console.log('pin', pin[0].owners);
-      // const owners = pin[0].owners;
-      // owners.slice(args.i, 1);
       const pinUpdated = await Pin.findOneAndUpdate(
         { _id: args.pinId },
-        { $set: { owners: pin[0].owners.slice(args.i, 1) } },
+        {
+          $set: {
+            owners: pin[0].owners
+              .slice(0, args.i)
+              .concat(pin[0].owners.slice(args.i + 1, pin[0].owners.length)),
+          },
+        },
         { new: true }
       )
         .populate('author')
@@ -90,6 +95,32 @@ module.exports = {
       pubsub.publish(PIN_UPDATED, { pinUpdated });
       return pinUpdated;
     }),
+
+    updateOwner: authenticated(async (root, args, ctx) => {
+      const { pinId, i, percentage, name } = args;
+      console.log('args', pinId, i, percentage, name);
+      const pin = await Pin.find({ _id: args.pinId }).exec();
+      pin[0].owners[i].name = name;
+      pin[0].owners[i].percentage = percentage;
+      const owners = pin[0].owners;
+
+      const pinUpdated = await Pin.findOneAndUpdate(
+        { _id: pinId },
+        {
+          $set: {
+            owners: owners,
+          },
+        },
+        { new: true }
+      )
+        .populate('author')
+        .populate('comments.author')
+        .populate('owners.author')
+        .populate('assets.author');
+      pubsub.publish(PIN_UPDATED, { pinUpdated });
+      return pinUpdated;
+    }),
+
     createAsset: authenticated(async (root, args, ctx) => {
       const newAsset = {
         creater: ctx.currentUser._id,
@@ -102,6 +133,53 @@ module.exports = {
       const pinUpdated = await Pin.findOneAndUpdate(
         { _id: args.pinId },
         { $push: { assets: newAsset } },
+        { new: true }
+      )
+        .populate('author')
+        .populate('comments.author')
+        .populate('owners.author')
+        .populate('assets.author');
+      pubsub.publish(PIN_UPDATED, { pinUpdated });
+      return pinUpdated;
+    }),
+
+    updateAsset: authenticated(async (root, args, ctx) => {
+      const { pinId, i, codeName, renter, rent, category, isRented } = args;
+      const pin = await Pin.find({ _id: args.pinId }).exec();
+      pin[0].assets[i].codeName = codeName;
+      pin[0].assets[i].renter = renter;
+      pin[0].assets[i].rent = rent;
+      pin[0].assets[i].category = category;
+      pin[0].assets[i].isRented = isRented;
+      const assets = pin[0].assets;
+      const pinUpdated = await Pin.findOneAndUpdate(
+        { _id: pinId },
+        {
+          $set: {
+            assets: assets,
+          },
+        },
+        { new: true }
+      )
+        .populate('author')
+        .populate('comments.author')
+        .populate('owners.author')
+        .populate('assets.author');
+      pubsub.publish(PIN_UPDATED, { pinUpdated });
+      return pinUpdated;
+    }),
+
+    deleteAsset: authenticated(async (root, args, ctx) => {
+      const pin = await Pin.find({ _id: args.pinId }).exec();
+      const pinUpdated = await Pin.findOneAndUpdate(
+        { _id: args.pinId },
+        {
+          $set: {
+            assets: pin[0].assets
+              .slice(0, args.i)
+              .concat(pin[0].assets.slice(args.i + 1, pin[0].assets.length)),
+          },
+        },
         { new: true }
       )
         .populate('author')

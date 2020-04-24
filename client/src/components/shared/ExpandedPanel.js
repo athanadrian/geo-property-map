@@ -26,6 +26,18 @@ export default function ExpandedPanel({
 }) {
   const classes = useExpandedPanelStyles();
   const [expanded, setExpanded] = useState(false);
+  const [isOwnerEdit, setIsOwnerEdit] = useState(false);
+  const [isAssetEdit, setIsAssetEdit] = useState(false);
+  const [ownerRow, setOwnerRow] = useState({}, null);
+  const [assetRow, setAssetRow] = useState({}, null);
+
+  const handleEditOwnerButton = () => {
+    console.log('clicked');
+    setIsOwnerEdit(true);
+  };
+  const handleEditAssetButton = () => {
+    setIsAssetEdit(true);
+  };
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -53,13 +65,20 @@ export default function ExpandedPanel({
           </ExpansionPanelSummary>
           <ExpansionPanelDetails className={classes.details}>
             <div className={classes.root}>
-              <CreateOwner />
+              <CreateOwner
+                isOwnerEdit={isOwnerEdit}
+                setIsOwnerEdit={setIsOwnerEdit}
+                ownerRow={ownerRow}
+              />
             </div>
           </ExpansionPanelDetails>
           <ExpansionPanelDetails className={classes.details}>
             <div className={classes.itemRowList}>
-              {/* <Owners owners={owners} handleDeleteOwner={handleDeleteOwner} /> */}
-              <Owners owners={owners} />
+              <Owners
+                owners={owners}
+                setOwnerRow={setOwnerRow}
+                handleEditOwnerButton={handleEditOwnerButton}
+              />
             </div>
           </ExpansionPanelDetails>
         </ExpansionPanel>
@@ -82,12 +101,20 @@ export default function ExpandedPanel({
           </ExpansionPanelSummary>
           <ExpansionPanelDetails className={classes.details}>
             <div className={classes.root}>
-              <CreateAsset />
+              <CreateAsset
+                isAssetEdit={isAssetEdit}
+                setIsAssetEdit={setIsAssetEdit}
+                assetRow={assetRow}
+              />
             </div>
           </ExpansionPanelDetails>
           <ExpansionPanelDetails className={classes.details}>
             <div className={classes.itemRowList}>
-              <Assets assets={assets} />
+              <Assets
+                assets={assets}
+                setAssetRow={setAssetRow}
+                handleEditAssetButton={handleEditAssetButton}
+              />
             </div>
           </ExpansionPanelDetails>
         </ExpansionPanel>

@@ -78,6 +78,7 @@ module.exports = gql`
     deletePin(pinId: ID!): Pin
     createComment(pinId: ID!, text: String!): Pin
     createOwner(pinId: ID!, name: String!, percentage: String!): Pin
+    updateOwner(pinId: ID!, i: Int!, name: String, percentage: String!): Pin
     deleteOwner(pinId: ID!, i: Int!): Pin
     createAsset(
       pinId: ID!
@@ -87,6 +88,15 @@ module.exports = gql`
       category: String!
       isRented: Boolean!
     ): Pin
+    updateAsset(
+      pinId: ID!
+      codeName: String!
+      renter: String
+      rent: String
+      category: String!
+      isRented: Boolean!
+    ): Pin
+    deleteAsset(pinId: ID!, i: Int!): Pin
   }
 
   type Subscription {

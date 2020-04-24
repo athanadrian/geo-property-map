@@ -555,6 +555,12 @@ export const useOwnersStyles = makeStyles((theme) => ({
     justifyContent: 'start',
     padding: '0px 5px',
   },
+  deleteButton: {
+    color: 'red',
+  },
+  editButton: {
+    color: '#009688',
+  },
 }));
 
 /* Asset component: /components/Asset/Assets.js */
@@ -574,6 +580,12 @@ export const useAssetsStyles = makeStyles((theme) => ({
   },
   inline: {
     display: 'inline',
+  },
+  deleteButton: {
+    color: 'red',
+  },
+  editButton: {
+    color: '#009688',
   },
 }));
 
